@@ -1,0 +1,87 @@
+.app-shell {
+  --shell-background: #ffffff;
+  --text-primary: #202124;
+  --text-secondary: rgba(32, 33, 36, 0.78);
+
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background: var(--shell-background);
+  color: var(--text-primary);
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+.app-shell[data-theme="dark"] {
+  --shell-background: #101215;
+  --text-primary: #f5f7fb;
+  --text-secondary: rgba(245, 247, 251, 0.72);
+}
+
+.clock-panel {
+  width: min(82vw, 72rem);
+}
+
+.clock-panel__content {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-lg);
+  width: 100%;
+  min-height: min(62vh, 32rem);
+  text-align: center;
+}
+
+.clock-line--time {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(0.3rem, 1vw, 0.55rem);
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-time);
+  font-weight: 560;
+  letter-spacing: 0;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.clock-line__time-part {
+  display: inline-flex;
+  align-items: stretch;
+  gap: clamp(0.22rem, 0.8vw, 0.42rem);
+}
+
+.clock-line__time-digit {
+  display: inline-flex;
+  align-items: center;
+}
+
+.clock-line__time-separator {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(-0.03em);
+}
+
+.clock-line--date {
+  font-size: var(--font-size-date);
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: var(--space-md);
+  }
+
+  .clock-panel__content {
+    gap: var(--space-md);
+    min-height: 50vh;
+  }
+}

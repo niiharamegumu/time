@@ -1,0 +1,31 @@
+:root {
+  color-scheme: light dark;
+
+  --font-sans:
+    "SF Pro Display", "SF Pro Text", "Segoe UI", "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
+  --font-mono:
+    "SF Mono", "JetBrains Mono", "IBM Plex Mono", "Menlo", monospace;
+
+  --radius-panel: 28px;
+  --radius-glow: 32px;
+
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 2.75rem;
+
+  --font-size-time: clamp(4.75rem, 10vw, 11rem);
+  --font-size-date: clamp(1.15rem, 2.4vw, 1.85rem);
+  --font-size-weekday: clamp(0.95rem, 1.8vw, 1rem);
+
+  --letter-spacing-time: -0.08em;
+  --letter-spacing-meta: -0.02em;
+  --line-height-tight: 0.95;
+  --line-height-regular: 1.2;
+
+  --transition-base: 220ms ease;
+}
