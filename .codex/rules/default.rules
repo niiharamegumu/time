@@ -51,21 +51,23 @@ prefix_rule(
 
 prefix_rule(
     pattern = ["git", "push"],
-    decision = "prompt",
-    justification = "Pushing publishes local work to a remote and should stay interactive.",
+    decision = "allow",
+    justification = "Pushing a reviewed feature branch is allowed in this repository workflow.",
     match = [
         "git push origin HEAD",
         "git push -u origin feature/example",
     ],
     not_match = [
-        "git pull origin main",
+        "git push origin main",
+        "git push --force",
+        "git push --force-with-lease",
     ],
 )
 
 prefix_rule(
     pattern = ["gh", "pr", "create"],
-    decision = "prompt",
-    justification = "Creating a pull request affects a remote repository and should stay interactive.",
+    decision = "allow",
+    justification = "Creating a pull request for reviewed local changes is allowed.",
     match = [
         "gh pr create --title test --body body",
     ],
@@ -73,6 +75,7 @@ prefix_rule(
         "gh pr view 123",
     ],
 )
+
 
 prefix_rule(
     pattern = ["git", "reset", "--hard"],
