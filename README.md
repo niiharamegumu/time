@@ -44,6 +44,16 @@ npm run build
 - `cargo test --manifest-path src-tauri/Cargo.toml`
 - `npm run build`
 
+## Icon Assets
+
+- Web の favicon / ロゴは `public/logo.png` を使います。
+- Tauri の配布アイコンは `src-tauri/icon-source.svg` を元に生成します。
+- 再生成コマンド:
+
+```bash
+npm run tauri -- icon src-tauri/icon-source.svg -o src-tauri/icons
+```
+
 ## Manual Smoke Test
 
 - `npm run tauri:dev` でアプリが 1 ウィンドウのみ起動する
