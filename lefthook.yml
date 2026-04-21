@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      run: npm run lint
+    typecheck:
+      run: npm run typecheck
+
+pre-push:
+  parallel: false
+  commands:
+    test-web:
+      run: npm run test:run
+    test-rust:
+      run: cargo test --manifest-path src-tauri/Cargo.toml
+    build-web:
+      run: npm run build
