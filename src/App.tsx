@@ -4,6 +4,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { useAppSettings } from "./hooks/useAppSettings";
 import { useNow } from "./hooks/useNow";
 import { useTheme } from "./hooks/useTheme";
+import { useUpdater } from "./hooks/useUpdater";
 import { useWindowBehavior } from "./hooks/useWindowBehavior";
 import { getDayPhase } from "./lib/phase/getDayPhase";
 
@@ -24,6 +25,7 @@ function App() {
   const theme = useTheme();
   const phase = getDayPhase(now);
   const [settings, setSettings] = useAppSettings();
+  const updater = useUpdater();
 
   useWindowBehavior(settings.alwaysOnTop, setSettings, !isSettingsWindow);
 
@@ -32,12 +34,26 @@ function App() {
       {isSettingsWindow ? (
         <SettingsPanel
           alwaysOnTop={settings.alwaysOnTop}
+          onBackToApp={() => {
+            const window = getCurrentWindow();
+            void window.hide();
+          }}
           onAlwaysOnTopChange={(alwaysOnTop) => {
             setSettings((currentSettings) => ({
               ...currentSettings,
               alwaysOnTop,
             }));
           }}
+          onCheckForUpdates={() => {
+            void updater.checkForUpdates();
+          }}
+          onInstallUpdate={() => {
+            void updater.installUpdate();
+          }}
+          updateAvailable={updater.isEnabled}
+          updateErrorMessage={updater.errorMessage}
+          updateInfo={updater.info}
+          updateStatus={updater.status}
         />
       ) : (
         <ClockPanel now={now} theme={theme} />

@@ -22,6 +22,8 @@ const TRAY_QUIT_MENU_ID: &str = "tray-quit";
 const SETTINGS_SYNC_EVENT: &str = "settings:sync";
 const ALWAYS_ON_TOP_CHANGED_EVENT: &str = "settings:always-on-top-changed";
 const TRAY_TEMPLATE_ICON_BYTES: &[u8] = include_bytes!("../icons/tray-template/64x64.png");
+const UPDATER_PUBKEY_PLACEHOLDER: &str = "__TAURI_UPDATER_PUBKEY__";
+const RAW_TAURI_CONFIG: &str = include_str!("../tauri.conf.json");
 
 #[derive(Default)]
 struct AppState {
@@ -236,11 +238,20 @@ fn build_system_ui<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     Ok(())
 }
 
+fn updater_is_configured() -> bool {
+    !RAW_TAURI_CONFIG.contains(UPDATER_PUBKEY_PLACEHOLDER)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(AppState::default())
         .setup(|app| {
+            #[cfg(desktop)]
+            if updater_is_configured() {
+                app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+            }
+
             build_system_ui(&app.handle())?;
             Ok(())
         })
