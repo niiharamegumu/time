@@ -11,7 +11,7 @@ export type AppSettings = {
 };
 
 export const defaultSettings: AppSettings = {
-  alwaysOnTop: true,
+  alwaysOnTop: false,
   showSeconds: true,
   timeFormat: "24h",
   showWeekday: true,

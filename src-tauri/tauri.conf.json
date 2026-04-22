@@ -17,10 +17,9 @@
         "title": "Time",
         "width": 520,
         "height": 260,
-        "minWidth": 460,
-        "minHeight": 220,
+        "minWidth": 300,
+        "minHeight": 150,
         "center": true,
-        "alwaysOnTop": true,
         "resizable": true,
         "titleBarStyle": "Transparent",
         "backgroundColor": [255, 255, 255, 255]
