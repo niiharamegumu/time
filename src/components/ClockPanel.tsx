@@ -16,8 +16,10 @@ export function ClockPanel({ now, theme }: ClockPanelProps) {
       data-theme={theme}
     >
       <div className="clock-panel__content">
-        <DateLine now={now} />
-        <TimeLine now={now} />
+        <div className="clock-panel__time-anchor">
+          <DateLine now={now} />
+          <TimeLine now={now} />
+        </div>
       </div>
     </section>
   );

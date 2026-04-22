@@ -4,7 +4,7 @@ import { defaultSettings } from "./settings.types";
 describe("defaultSettings", () => {
   it("matches the MVP defaults", () => {
     expect(defaultSettings).toEqual({
-      alwaysOnTop: true,
+      alwaysOnTop: false,
       showSeconds: true,
       timeFormat: "24h",
       showWeekday: true,
