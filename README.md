@@ -10,7 +10,8 @@ macOS 向けのシンプルな時計アプリです。Tauri 2、React、TypeScri
 - 日本語曜日の表示
 - 1秒ごとの更新
 - 起動時中央表示
-- 常に前面表示
+- 常時最前面の切替
+- メニューバー常駐
 - ライト / ダーク両対応
 
 ## Setup
@@ -48,10 +49,12 @@ npm run build
 
 - Web の favicon / ロゴは `public/logo.png` を使います。
 - Tauri の配布アイコンは `src-tauri/icon-source.svg` を元に生成します。
+- メニューバー用アイコンは `src-tauri/tray-icon-source.svg` を元に生成します。
 - 再生成コマンド:
 
 ```bash
 npm run tauri -- icon src-tauri/icon-source.svg -o src-tauri/icons
+npm run tauri -- icon src-tauri/tray-icon-source.svg -o src-tauri/icons/tray-template
 ```
 
 ## Manual Smoke Test
@@ -60,5 +63,7 @@ npm run tauri -- icon src-tauri/icon-source.svg -o src-tauri/icons
 - 起動時に中央へ表示される
 - 秒ごとに時刻が更新される
 - 日付と曜日が正しく表示される
-- 常に前面表示される
+- 設定から常時最前面を切り替えられる
+- 閉じる操作で終了せず、メニューバーに残る
+- メニューバーから再表示と終了ができる
 - macOS のライト / ダーク切替で見た目が破綻しない
