@@ -134,7 +134,7 @@ jobs:
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0.6.2
         with:
-          uploadUpdaterJson: true
+          includeUpdaterJson: true
           releaseBody: "See the assets to download this version and install."
           releaseDraft: false
           releaseName: "Time v__VERSION__"
