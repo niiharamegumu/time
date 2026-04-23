@@ -3,9 +3,5 @@ function pad(value: number) {
 }
 
 export function formatTime(date: Date) {
-  return [
-    pad(date.getHours()),
-    pad(date.getMinutes()),
-    pad(date.getSeconds()),
-  ].join(" : ");
+  return [pad(date.getHours()), pad(date.getMinutes()), pad(date.getSeconds())].join(":");
 }

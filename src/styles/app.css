@@ -15,6 +15,14 @@
     color var(--transition-base);
 }
 
+.app-shell--clock {
+  place-items: center;
+  padding: 0;
+  background: var(--shell-background);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
 .app-shell[data-theme="dark"] {
   --shell-background: #101215;
   --text-primary: #f5f7fb;
@@ -22,90 +30,158 @@
 }
 
 .clock-panel {
-  width: min(100%, 72rem);
-  height: 100%;
-  container-type: size;
+  width: min(100%, 1200px);
+  display: block;
 }
 
-.clock-panel__content {
-  --clock-time-size: min(18cqi, 48cqb);
-  --clock-time-gap: min(1cqi, 1.4cqb);
-  --clock-part-gap: min(0.7cqi, 1cqb);
-  --clock-date-size: min(4.6cqi, 9cqb);
-  --clock-date-offset: min(2.2cqi, 4.4cqb);
+.clock-panel__frame {
+  --clock-divider: rgba(69, 70, 72, 0.12);
+  --clock-outline: rgba(72, 72, 74, 0.48);
+  --clock-fill: #414346;
+  --clock-label-color: #3b3d40;
+  --clock-text-color: #35373a;
+  --clock-dot-gap: 0.62rem;
+  --clock-dot-size-day: 0.94rem;
+  --clock-dot-size-month: 0.94rem;
+  --clock-dot-size-year: 0.38rem;
+  --clock-year-gap: 0.3rem;
+  --clock-label-size: 1.25rem;
+  --clock-date-size: 4.4rem;
+  --clock-weekday-size: 2.25rem;
+  --clock-time-size: 9.2rem;
+  --clock-seconds-size: 4rem;
 
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  padding-block: clamp(1.25rem, min(6cqi, 8cqb), 3rem);
-  text-align: center;
-}
-
-.clock-panel__time-anchor {
-  position: relative;
-  display: grid;
-  justify-items: center;
-}
-
-.clock-line--time {
-  display: inline-flex;
-  align-items: stretch;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: clamp(0.14rem, var(--clock-time-gap), 0.55rem);
-  width: max-content;
-  max-width: 100%;
-  font-family: var(--font-sans);
-  font-size: clamp(2.8rem, var(--clock-time-size), var(--font-size-time));
-  font-weight: 560;
-  letter-spacing: 0;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+  width: min(100%, 1120px);
+  padding: 2.1rem 2rem 1.8rem;
+  background: transparent;
 }
 
-.clock-line__time-part {
-  display: inline-flex;
-  align-items: stretch;
-  gap: clamp(0.08rem, var(--clock-part-gap), 0.42rem);
+.clock-section {
+  display: grid;
+  gap: 0.85rem;
+  padding-block: 1rem;
 }
 
-.clock-line__time-digit {
-  display: inline-flex;
-  align-items: center;
+.clock-section:first-child {
+  padding-top: 0;
 }
 
-.clock-line__time-separator {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  transform: translateY(-0.03em);
+.clock-section + .clock-section {
+  border-top: 1px solid var(--clock-divider);
 }
 
-.clock-line--date {
-  position: absolute;
-  bottom: calc(100% + clamp(0.5rem, var(--clock-date-offset), 1.5rem));
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
+.clock-section__label {
   margin: 0;
-  font-size: clamp(0.82rem, var(--clock-date-size), var(--font-size-date));
-  font-weight: 500;
-  letter-spacing: clamp(0.01em, min(0.12cqi, 0.18cqb), 0.035em);
-  line-height: 1.45;
-  color: var(--text-secondary);
+  font-family: var(--font-serif-ja);
+  font-size: var(--clock-label-size);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  color: var(--clock-label-color);
+}
+
+.clock-section__date-row,
+.clock-section__time-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.clock-section__date,
+.clock-section__weekday,
+.clock-section__time-main,
+.clock-section__time-seconds {
+  margin: 0;
+  font-family: var(--font-serif-ja);
+  font-weight: 400;
+  line-height: 0.92;
+  color: var(--clock-text-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-section__date {
+  font-size: var(--clock-date-size);
+  letter-spacing: -0.05em;
+}
+
+.clock-section__weekday {
+  padding-bottom: 0.3rem;
+  font-size: var(--clock-weekday-size);
+  letter-spacing: 0.02em;
+}
+
+.clock-section__time-main {
+  font-size: var(--clock-time-size);
+  letter-spacing: -0.08em;
+}
+
+.clock-section__time-seconds {
+  padding-bottom: 0.45rem;
+  font-size: var(--clock-seconds-size);
+  letter-spacing: -0.05em;
+}
+
+.dot-row {
+  display: flex;
+  align-items: center;
+  gap: var(--clock-dot-gap);
+  max-width: 100%;
+}
+
+.dot-row--wrap {
+  flex-wrap: wrap;
+}
+
+.dot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clock-year-gap);
+  max-width: 100%;
+}
+
+.progress-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid var(--clock-outline);
+  background: transparent;
+}
+
+.progress-dot[data-filled="true"] {
+  border-color: var(--clock-fill);
+  background: var(--clock-fill);
+}
+
+.progress-dot--day,
+.progress-dot--month,
+.progress-dot--work {
+  width: var(--clock-dot-size-day);
+  height: var(--clock-dot-size-day);
+}
+
+.progress-dot--month {
+  width: var(--clock-dot-size-month);
+  height: var(--clock-dot-size-month);
+}
+
+.progress-dot--year {
+  width: var(--clock-dot-size-year);
+  height: var(--clock-dot-size-year);
+  border-width: 1px;
 }
 
 .settings-panel {
-  width: min(100%, 1120px);
+  width: min(100%, 1380px);
   min-height: 100%;
 }
 
 .settings-panel__shell {
   display: grid;
   grid-template-columns: 15.5rem minmax(0, 1fr);
-  gap: clamp(1.25rem, 2.2vw, 2.5rem);
+  gap: clamp(2rem, 3vw, 3.2rem);
   min-height: 100%;
 }
 
@@ -152,7 +228,7 @@
 }
 
 .settings-panel__nav-item--active {
-  background: rgba(32, 33, 36, 0.05);
+  background: rgba(32, 33, 36, 0.04);
 }
 
 .settings-panel__nav-mark {
@@ -172,27 +248,30 @@
 .settings-panel__content {
   display: grid;
   align-content: start;
-  gap: 1.25rem;
+  gap: 1.1rem;
   padding: clamp(0.5rem, 0.8vw, 1rem) 0 1rem;
+  min-width: 0;
 }
 
 .settings-panel__header {
   display: grid;
-  justify-items: center;
+  justify-items: start;
 }
 
 .settings-panel__title {
   margin: 0;
-  font-size: clamp(1.75rem, 2vw, 2.15rem);
+  font-size: clamp(1.95rem, 2.2vw, 2.35rem);
   font-weight: 620;
   letter-spacing: -0.04em;
 }
 
 .settings-panel__card {
-  border: 1px solid rgba(32, 33, 36, 0.07);
-  border-radius: 22px;
+  width: min(100%, 980px);
+  border: 1px solid rgba(32, 33, 36, 0.05);
+  border-radius: 24px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
+  background: #ffffff;
+  box-shadow: 0 6px 22px rgba(32, 33, 36, 0.03);
 }
 
 .settings-panel__list {
@@ -200,30 +279,36 @@
 }
 
 .settings-panel__list > * + * {
-  border-top: 1px solid rgba(32, 33, 36, 0.07);
+  border-top: 1px solid rgba(32, 33, 36, 0.05);
 }
 
 .settings-panel__row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  padding: 1.15rem 1.3rem;
+  gap: 1.5rem;
+  padding: 1.3rem 1.55rem;
 }
 
 .settings-panel__row--list {
-  min-height: 96px;
+  min-height: 104px;
 }
 
 .settings-panel__row--stack {
   display: grid;
   justify-content: stretch;
-  gap: 0.9rem;
+  gap: 1rem;
+}
+
+.settings-panel__row--work {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
 }
 
 .settings-panel__row-copy {
   display: grid;
-  gap: 0.28rem;
+  gap: 0.35rem;
   min-width: 0;
 }
 
@@ -235,37 +320,122 @@
 
 .settings-panel__row-description {
   color: var(--text-secondary);
-  font-size: 0.92rem;
-  line-height: 1.5;
+  font-size: 0.94rem;
+  line-height: 1.48;
   margin: 0;
 }
 
-.settings-panel__row input {
-  width: 1.1rem;
-  height: 1.1rem;
+.settings-panel__row input[type="checkbox"]:not(.settings-panel__switch-input) {
+  width: 1.15rem;
+  height: 1.15rem;
   flex: 0 0 auto;
+}
+
+.settings-panel__time-fields {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(10rem, 11rem));
+  align-items: end;
+  justify-content: start;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.settings-panel__toggle {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.2rem;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 560;
+}
+
+.settings-panel__toggle-label {
+  color: var(--text-secondary);
+}
+
+.settings-panel__switch-input {
+  appearance: none;
+  position: relative;
+  width: 3.9rem;
+  height: 2.25rem;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(32, 33, 36, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(32, 33, 36, 0.03);
+  transition:
+    background var(--transition-base),
+    box-shadow var(--transition-base);
+  cursor: pointer;
+}
+
+.settings-panel__switch-input::after {
+  content: "";
+  position: absolute;
+  top: 0.18rem;
+  left: 0.18rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(32, 33, 36, 0.2),
+    0 3px 8px rgba(32, 33, 36, 0.08);
+  transition: transform var(--transition-base);
+}
+
+.settings-panel__switch-input:checked {
+  background: #1f6fe5;
+}
+
+.settings-panel__switch-input:checked::after {
+  transform: translateX(1.65rem);
+}
+
+.settings-panel__time-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.settings-panel__time-field input[type="time"] {
+  border: 0;
+  border-radius: 18px;
+  padding: 0.9rem 1rem;
+  background: rgba(32, 33, 36, 0.045);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.98rem;
+}
+
+.settings-panel__time-field input[type="time"]:disabled {
+  opacity: 0.48;
 }
 
 .settings-panel__row-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 0.65rem;
+  align-items: center;
+  gap: 0.8rem;
   flex: 0 0 auto;
 }
 
 .settings-panel__button {
-  border: 1px solid rgba(32, 33, 36, 0.09);
+  border: 0;
   border-radius: 999px;
-  padding: 0.72rem 1rem;
-  background: rgba(32, 33, 36, 0.04);
+  padding: 0.88rem 1.1rem;
+  background: rgba(32, 33, 36, 0.045);
   color: var(--text-primary);
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   font-weight: 600;
   transition:
     background var(--transition-base),
-    border-color var(--transition-base),
     color var(--transition-base),
     opacity var(--transition-base);
 }
@@ -292,7 +462,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
 .settings-panel__update-meta-item dt {
@@ -309,13 +479,21 @@
   margin: 0;
   padding-top: 0.2rem;
   color: var(--text-secondary);
-  font-size: 0.92rem;
+  font-size: 0.93rem;
   line-height: 1.55;
   white-space: pre-wrap;
 }
 
 .app-shell[data-theme="dark"] .settings-panel__back-link {
   color: var(--text-secondary);
+}
+
+.app-shell[data-theme="dark"] .clock-panel__frame {
+  --clock-divider: rgba(245, 247, 251, 0.12);
+  --clock-outline: rgba(245, 247, 251, 0.45);
+  --clock-fill: #f5f7fb;
+  --clock-label-color: rgba(245, 247, 251, 0.82);
+  --clock-text-color: #f5f7fb;
 }
 
 .app-shell[data-theme="dark"] .settings-panel__nav-item--active {
@@ -332,8 +510,25 @@
 }
 
 .app-shell[data-theme="dark"] .settings-panel__button {
-  border-color: rgba(245, 247, 251, 0.08);
   background: rgba(255, 255, 255, 0.05);
+}
+
+.app-shell[data-theme="dark"] .settings-panel__switch-input {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.app-shell[data-theme="dark"] .settings-panel__switch-input::after {
+  background: #ffffff;
+}
+
+.app-shell[data-theme="dark"] .settings-panel__switch-input:checked {
+  background: #3b82f6;
+}
+
+.app-shell[data-theme="dark"] .settings-panel__time-field input[type="time"] {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
 }
 
 .app-shell[data-theme="dark"] .settings-panel__button--primary {
@@ -344,6 +539,26 @@
 @media (max-width: 720px) {
   .app-shell {
     padding: var(--space-md);
+  }
+
+  .app-shell--clock {
+    padding: 0;
+  }
+
+  .clock-panel__frame {
+    min-height: auto;
+    padding:
+      clamp(1.2rem, 4vw, 1.6rem)
+      clamp(0.95rem, 3.5vw, 1.25rem)
+      clamp(1rem, 4vw, 1.45rem);
+  }
+
+  .clock-section__time-row {
+    gap: 0.6rem 1rem;
+  }
+
+  .dot-row {
+    gap: 0.5rem;
   }
 
   .settings-panel__shell {
@@ -366,10 +581,27 @@
   .settings-panel__row {
     padding-inline: 1rem;
     align-items: flex-start;
+    grid-template-columns: 1fr;
   }
 
   .settings-panel__row-actions {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .settings-panel__time-fields {
+    width: 100%;
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .settings-panel__time-field {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .settings-panel__toggle {
+    justify-content: space-between;
     width: 100%;
   }
 

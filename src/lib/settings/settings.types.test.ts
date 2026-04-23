@@ -5,6 +5,9 @@ describe("defaultSettings", () => {
   it("matches the MVP defaults", () => {
     expect(defaultSettings).toEqual({
       alwaysOnTop: false,
+      workProgressEnabled: false,
+      workStartTime: null,
+      workEndTime: null,
       showSeconds: true,
       timeFormat: "24h",
       showWeekday: true,

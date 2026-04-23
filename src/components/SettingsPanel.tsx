@@ -3,8 +3,16 @@ import type { UpdateInfo, UpdateStatus } from "../hooks/useUpdater";
 
 type SettingsPanelProps = {
   alwaysOnTop: boolean;
+  workProgressEnabled: boolean;
+  workEndTime: string | null;
+  workStartTime: string | null;
   onBackToApp: () => void;
   onAlwaysOnTopChange: (alwaysOnTop: boolean) => void;
+  onWorkProgressEnabledChange: (workProgressEnabled: boolean) => void;
+  onWorkScheduleChange: (
+    workStartTime: string | null,
+    workEndTime: string | null,
+  ) => void;
   onCheckForUpdates: () => void;
   onInstallUpdate: () => void;
   updateAvailable: boolean;
@@ -86,8 +94,13 @@ function formatByteProgress(updateInfo: UpdateInfo | null) {
 
 export function SettingsPanel({
   alwaysOnTop,
+  workProgressEnabled,
+  workEndTime,
+  workStartTime,
   onBackToApp,
   onAlwaysOnTopChange,
+  onWorkProgressEnabledChange,
+  onWorkScheduleChange,
   onCheckForUpdates,
   onInstallUpdate,
   updateAvailable,
@@ -102,6 +115,8 @@ export function SettingsPanel({
     updateStatus === "checking" ||
     updateStatus === "downloading" ||
     updateStatus === "installing";
+  const [workStartDraft, setWorkStartDraft] = useState(workStartTime ?? "");
+  const [workEndDraft, setWorkEndDraft] = useState(workEndTime ?? "");
   const canInstall =
     updateInfo !== null &&
     (updateStatus === "available" || updateStatus === "error");
@@ -165,6 +180,7 @@ export function SettingsPanel({
                   </span>
                   <input
                     aria-label="常に手前に表示"
+                    className="settings-panel__switch-input"
                     checked={alwaysOnTop}
                     type="checkbox"
                     onChange={(event) => {
@@ -172,6 +188,67 @@ export function SettingsPanel({
                     }}
                   />
                 </label>
+                <div
+                  className="settings-panel__row settings-panel__row--list settings-panel__row--work"
+                  role="listitem"
+                >
+                  <div className="settings-panel__row-copy">
+                    <h2 className="settings-panel__row-title">仕事時間</h2>
+                    <p className="settings-panel__row-description">
+                      開始と終了を30分刻みで設定すると、主画面に仕事の進捗を表示します。
+                    </p>
+                  </div>
+                  <div className="settings-panel__time-fields">
+                    <label className="settings-panel__toggle">
+                      <span className="settings-panel__toggle-label">表示</span>
+                      <input
+                        aria-label="仕事時間を表示"
+                        className="settings-panel__switch-input"
+                        checked={workProgressEnabled}
+                        type="checkbox"
+                        onChange={(event) => {
+                          onWorkProgressEnabledChange(event.target.checked);
+                        }}
+                      />
+                    </label>
+                    <label className="settings-panel__time-field">
+                      <span>開始</span>
+                      <input
+                        aria-label="仕事開始時刻"
+                        disabled={!workProgressEnabled}
+                        step={1800}
+                        type="time"
+                        value={workStartDraft}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setWorkStartDraft(nextValue);
+                          onWorkScheduleChange(
+                            nextValue === "" ? null : nextValue,
+                            workEndDraft === "" ? null : workEndDraft,
+                          );
+                        }}
+                      />
+                    </label>
+                    <label className="settings-panel__time-field">
+                      <span>終了</span>
+                      <input
+                        aria-label="仕事終了時刻"
+                        disabled={!workProgressEnabled}
+                        step={1800}
+                        type="time"
+                        value={workEndDraft}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setWorkEndDraft(nextValue);
+                          onWorkScheduleChange(
+                            workStartDraft === "" ? null : workStartDraft,
+                            nextValue === "" ? null : nextValue,
+                          );
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="settings-panel__list" role="list">

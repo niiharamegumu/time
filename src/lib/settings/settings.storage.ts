@@ -1,4 +1,5 @@
 import { type AppSettings, defaultSettings } from "./settings.types";
+import { normalizeWorkSchedule } from "./workSchedule";
 
 export const APP_SETTINGS_STORAGE_KEY = "time.app.settings";
 
@@ -49,12 +50,26 @@ export function normalizeSettings(value: unknown): AppSettings {
     return { ...defaultSettings };
   }
 
+  const normalizedWorkSchedule = normalizeWorkSchedule(
+    typeof value.workStartTime === "string" ? value.workStartTime : null,
+    typeof value.workEndTime === "string" ? value.workEndTime : null,
+  );
+  const hasLegacyWorkSchedule =
+    normalizedWorkSchedule.workStartTime !== null &&
+    normalizedWorkSchedule.workEndTime !== null;
+
   return {
     alwaysOnTop: readBoolean(
       value,
       "alwaysOnTop",
       defaultSettings.alwaysOnTop,
     ),
+    workProgressEnabled: readBoolean(
+      value,
+      "workProgressEnabled",
+      hasLegacyWorkSchedule ? true : defaultSettings.workProgressEnabled,
+    ),
+    ...normalizedWorkSchedule,
     showSeconds: readBoolean(value, "showSeconds", defaultSettings.showSeconds),
     timeFormat: readString(value, "timeFormat", defaultSettings.timeFormat),
     showWeekday: readBoolean(value, "showWeekday", defaultSettings.showWeekday),

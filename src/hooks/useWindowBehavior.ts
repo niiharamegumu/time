@@ -10,14 +10,34 @@ import {
 } from "../lib/settings/settings.events";
 import type { AppSettings } from "../lib/settings/settings.types";
 
+function areSettingsEqual(left: AppSettings, right: AppSettings) {
+  return (
+    left.alwaysOnTop === right.alwaysOnTop &&
+    left.workProgressEnabled === right.workProgressEnabled &&
+    left.workStartTime === right.workStartTime &&
+    left.workEndTime === right.workEndTime &&
+    left.showSeconds === right.showSeconds &&
+    left.timeFormat === right.timeFormat &&
+    left.showWeekday === right.showWeekday &&
+    left.locale === right.locale &&
+    left.themeMode === right.themeMode &&
+    left.opacity === right.opacity
+  );
+}
+
 export function useWindowBehavior(
-  alwaysOnTop: boolean,
+  settings: AppSettings,
   setSettings: Dispatch<SetStateAction<AppSettings>>,
   enableCloseToTray: boolean,
+  shouldEmitSettingsSync = true,
 ) {
   useEffect(() => {
-    void emit<SettingsSyncPayload>(SETTINGS_SYNC_EVENT, { alwaysOnTop });
-  }, [alwaysOnTop]);
+    if (!shouldEmitSettingsSync) {
+      return;
+    }
+
+    void emit<SettingsSyncPayload>(SETTINGS_SYNC_EVENT, settings);
+  }, [settings, shouldEmitSettingsSync]);
 
   useEffect(() => {
     if (!enableCloseToTray) {
@@ -42,7 +62,18 @@ export function useWindowBehavior(
   }, [enableCloseToTray]);
 
   useEffect(() => {
+    let unlistenSettingsSync: (() => void) | undefined;
     let unlistenTrayEvent: (() => void) | undefined;
+
+    void listen<SettingsSyncPayload>(SETTINGS_SYNC_EVENT, (event) => {
+      setSettings((currentSettings) =>
+        areSettingsEqual(currentSettings, event.payload)
+          ? currentSettings
+          : event.payload,
+      );
+    }).then((unlisten) => {
+      unlistenSettingsSync = unlisten;
+    });
 
     void listen<AlwaysOnTopChangedPayload>(
       ALWAYS_ON_TOP_CHANGED_EVENT,
@@ -57,6 +88,7 @@ export function useWindowBehavior(
     });
 
     return () => {
+      unlistenSettingsSync?.();
       unlistenTrayEvent?.();
     };
   }, [setSettings]);

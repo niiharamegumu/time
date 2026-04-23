@@ -17,6 +17,55 @@ describe("normalizeSettings", () => {
       alwaysOnTop: true,
     });
   });
+
+  it("keeps a valid work schedule", () => {
+    expect(
+      normalizeSettings({
+        workProgressEnabled: true,
+        workStartTime: "09:00",
+        workEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      workProgressEnabled: true,
+      workStartTime: "09:00",
+      workEndTime: "13:00",
+    });
+  });
+
+  it("enables work progress for legacy saved schedules", () => {
+    expect(
+      normalizeSettings({
+        workStartTime: "09:00",
+        workEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      workProgressEnabled: true,
+      workStartTime: "09:00",
+      workEndTime: "13:00",
+    });
+  });
+
+  it("clears invalid work schedules", () => {
+    expect(
+      normalizeSettings({
+        workStartTime: "09:15",
+        workEndTime: "13:00",
+      }),
+    ).toEqual(defaultSettings);
+    expect(
+      normalizeSettings({
+        workStartTime: "13:00",
+        workEndTime: "09:00",
+      }),
+    ).toEqual(defaultSettings);
+    expect(
+      normalizeSettings({
+        workStartTime: "09:00",
+      }),
+    ).toEqual(defaultSettings);
+  });
 });
 
 describe("loadSettings", () => {
