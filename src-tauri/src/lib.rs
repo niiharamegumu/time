@@ -3,7 +3,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use serde::{Deserialize, Serialize};
 use tauri::{
     image::Image,
-    menu::{CheckMenuItem, CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder, SubmenuBuilder},
+    menu::{
+        CheckMenuItem, CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder, PredefinedMenuItem,
+        SubmenuBuilder,
+    },
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Listener, Manager, Runtime, WebviewUrl, WebviewWindowBuilder,
 };
@@ -143,6 +146,7 @@ fn build_system_ui<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     )
     .checked(false)
     .build(app)?;
+    let app_menu_close_window = PredefinedMenuItem::close_window(app, None)?;
     let app_menu_quit = MenuItemBuilder::with_id(APP_MENU_QUIT_MENU_ID, "Quit")
         .accelerator("CmdOrCtrl+Q")
         .build(app)?;
@@ -151,6 +155,7 @@ fn build_system_ui<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             &app_menu_open_settings,
             &app_menu_toggle_visibility,
             &app_menu_toggle_always_on_top,
+            &app_menu_close_window,
         ])
         .separator()
         .item(&app_menu_quit)
