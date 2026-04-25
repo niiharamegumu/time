@@ -17,6 +17,100 @@ describe("normalizeSettings", () => {
       alwaysOnTop: true,
     });
   });
+
+  it("keeps a valid work schedule", () => {
+    expect(
+      normalizeSettings({
+        workProgressEnabled: true,
+        workStartTime: "09:00",
+        workEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      workProgressEnabled: true,
+      workStartTime: "09:00",
+      workEndTime: "13:00",
+    });
+  });
+
+  it("enables work progress for legacy saved schedules", () => {
+    expect(
+      normalizeSettings({
+        workStartTime: "09:00",
+        workEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      workProgressEnabled: true,
+      workStartTime: "09:00",
+      workEndTime: "13:00",
+    });
+  });
+
+  it("keeps a valid break schedule", () => {
+    expect(
+      normalizeSettings({
+        workProgressEnabled: true,
+        workStartTime: "09:00",
+        workEndTime: "18:00",
+        breakEnabled: true,
+        breakStartTime: "12:00",
+        breakEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      breakEnabled: true,
+      breakStartTime: "12:00",
+      breakEndTime: "13:00",
+    });
+  });
+
+  it("preserves an explicit disabled break schedule after migration", () => {
+    expect(
+      normalizeSettings({
+        schemaVersion: 2,
+        workProgressEnabled: true,
+        workStartTime: "09:00",
+        workEndTime: "18:00",
+        breakEnabled: false,
+        breakStartTime: "12:00",
+        breakEndTime: "13:00",
+      }),
+    ).toEqual({
+      ...defaultSettings,
+      breakEnabled: false,
+      breakStartTime: defaultSettings.breakStartTime,
+      breakEndTime: defaultSettings.breakEndTime,
+    });
+  });
+
+  it("clears invalid display modes", () => {
+    expect(
+      normalizeSettings({
+        displayMode: "expanded",
+      }),
+    ).toEqual(defaultSettings);
+  });
+
+  it("clears invalid work schedules", () => {
+    expect(
+      normalizeSettings({
+        workStartTime: "09:15",
+        workEndTime: "13:00",
+      }),
+    ).toEqual(defaultSettings);
+    expect(
+      normalizeSettings({
+        workStartTime: "13:00",
+        workEndTime: "09:00",
+      }),
+    ).toEqual(defaultSettings);
+    expect(
+      normalizeSettings({
+        workStartTime: "09:00",
+      }),
+    ).toEqual(defaultSettings);
+  });
 });
 
 describe("loadSettings", () => {

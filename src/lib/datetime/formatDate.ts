@@ -3,5 +3,5 @@ function pad(value: number) {
 }
 
 export function formatDate(date: Date) {
-  return `${date.getFullYear()}年${pad(date.getMonth() + 1)}月${pad(date.getDate())}日`;
+  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
 }

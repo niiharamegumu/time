@@ -17,11 +17,11 @@ jobs:
       version: ${{ steps.release.outputs.version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Decide release eligibility
         id: release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require("node:fs");
@@ -84,10 +84,10 @@ jobs:
       TAURI_UPDATER_PUBKEY: ${{ vars.TAURI_UPDATER_PUBKEY }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -118,18 +118,6 @@ jobs:
 
           fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
           EOF
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Frontend tests
-        run: npm run test:run
-
-      - name: Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0.6.2

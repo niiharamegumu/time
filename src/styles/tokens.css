@@ -4,6 +4,9 @@
   --font-sans:
     "SF Pro Display", "SF Pro Text", "Segoe UI", "Helvetica Neue", Helvetica,
     Arial, sans-serif;
+  --font-serif-ja:
+    "Hiragino Mincho ProN", "YuMincho", "BIZ UDPMincho", "Times New Roman",
+    serif;
   --font-mono:
     "SF Mono", "JetBrains Mono", "IBM Plex Mono", "Menlo", monospace;
 

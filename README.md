@@ -11,8 +11,17 @@ Time は macOS 向けのシンプルな時計アプリです。Tauri 2、React�
 
 ## Installation
 
-- 配布ページ: [GitHub Releases](https://github.com/niiharamegumu/time/releases)
-- macOS では最新 release の asset をダウンロードしてインストールします。
+リリース済みのアプリは GitHub Releases からダウンロードできます。
+
+1. [GitHub Releases](https://github.com/niiharamegumu/time/releases) を開きます。
+2. 一番上の最新 release を開きます。
+3. `Assets` から macOS 用の `.dmg` ファイルをダウンロードします。
+4. ダウンロードした `.dmg` を開き、`Time.app` を `Applications` にドラッグします。
+5. `Applications` から `Time` を起動します。
+
+`latest.json`、`.tar.gz`、`.sig` はアプリ内アップデート用の asset です。通常の初回インストールでは `.dmg` を使ってください。
+
+macOS の Gatekeeper により初回起動時に確認が出る場合があります。その場合は、Finder の `Applications` で `Time.app` を右クリックして `開く` を選び、確認ダイアログでもう一度 `開く` を選択してください。
 
 ## Updating
 
