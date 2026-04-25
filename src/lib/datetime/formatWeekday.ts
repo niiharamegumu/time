@@ -1,4 +1,4 @@
-const weekdayFormatter = new Intl.DateTimeFormat("ja-JP", {
+const weekdayFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
 });
 
