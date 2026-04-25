@@ -503,7 +503,8 @@ fn build_system_ui<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
 }
 
 fn updater_is_configured() -> bool {
-    !RAW_TAURI_CONFIG.contains(UPDATER_PUBKEY_PLACEHOLDER)
+    RAW_TAURI_CONFIG.contains("\"pubkey\"")
+        && !RAW_TAURI_CONFIG.contains(UPDATER_PUBKEY_PLACEHOLDER)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

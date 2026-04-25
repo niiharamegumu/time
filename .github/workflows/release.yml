@@ -103,18 +103,26 @@ jobs:
           node <<'EOF'
           const fs = require("node:fs");
 
-          const pubkey = process.env.TAURI_UPDATER_PUBKEY;
+          const required = [
+            "TAURI_SIGNING_PRIVATE_KEY",
+            "TAURI_UPDATER_PUBKEY",
+          ];
+          const missing = required.filter((name) => !process.env[name]);
 
-          if (!pubkey) {
-            throw new Error("Repository variable TAURI_UPDATER_PUBKEY is required.");
+          if (missing.length > 0) {
+            throw new Error(
+              `Missing updater signing configuration: ${missing.join(", ")}`,
+            );
           }
 
           const path = "src-tauri/tauri.conf.json";
           const config = JSON.parse(fs.readFileSync(path, "utf8"));
 
+          config.bundle ??= {};
+          config.bundle.createUpdaterArtifacts = true;
           config.plugins ??= {};
           config.plugins.updater ??= {};
-          config.plugins.updater.pubkey = pubkey;
+          config.plugins.updater.pubkey = process.env.TAURI_UPDATER_PUBKEY;
 
           fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
           EOF

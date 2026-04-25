@@ -9,13 +9,13 @@
 ## Runtime Configuration
 
 - [src-tauri/tauri.conf.json](/Users/megu/Github/time/src-tauri/tauri.conf.json)
-  - `bundle.createUpdaterArtifacts: true`
+  - `bundle.createUpdaterArtifacts`
   - `plugins.updater.endpoints`
   - `plugins.updater.pubkey`
 - [src-tauri/capabilities/default.json](/Users/megu/Github/time/src-tauri/capabilities/default.json)
   - `updater:default`
 
-ローカルソースには `__TAURI_UPDATER_PUBKEY__` placeholder を置き、release workflow が実際の公開鍵に差し替えます。placeholder のままでは Rust 側で updater plugin を初期化しないため、通常の開発ビルドは維持されます。
+ローカルソースでは `bundle.createUpdaterArtifacts: false` とし、`plugins.updater.pubkey` も置きません。release workflow が公開鍵を注入し、`bundle.createUpdaterArtifacts: true` に切り替えます。公開鍵がないビルドでは Rust 側で updater plugin を初期化しないため、通常の開発ビルドは維持されます。
 
 ## In-App Flow
 
@@ -41,7 +41,7 @@ private key を失うと既存ユーザー向けに継続 release できなく�
 ## Troubleshooting
 
 - 設定画面で「このビルドではまだ利用できません」と出る
-  - placeholder のままビルドされているか、開発ビルドです。
+  - `plugins.updater.pubkey` が注入されていないか、開発ビルドです。
 - `latest.json` が見つからない
   - release workflow が skip されたか、`tauri-action` の upload に失敗しています。
 - 署名検証で失敗する
