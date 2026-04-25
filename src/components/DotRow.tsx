@@ -2,16 +2,20 @@ import { Dot } from "./Dot";
 
 type DotRowProps = {
   count: number;
-  filledCount: number;
   label: string;
+  progress: number;
   size: "day" | "month" | "work";
   wrap?: boolean;
 };
 
+function getDotFillRatio(index: number, progress: number) {
+  return Math.min(1, Math.max(0, progress - index));
+}
+
 export function DotRow({
   count,
-  filledCount,
   label,
+  progress,
   size,
   wrap = false,
 }: DotRowProps) {
@@ -21,7 +25,11 @@ export function DotRow({
       className={`dot-row dot-row--${size}${wrap ? " dot-row--wrap" : ""}`}
     >
       {Array.from({ length: count }, (_, index) => (
-        <Dot key={`${size}-${index}`} filled={index < filledCount} size={size} />
+        <Dot
+          key={`${size}-${index}`}
+          fillRatio={getDotFillRatio(index, progress)}
+          size={size}
+        />
       ))}
     </div>
   );

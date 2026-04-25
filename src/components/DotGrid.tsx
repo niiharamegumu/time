@@ -2,15 +2,23 @@ import { Dot } from "./Dot";
 
 type DotGridProps = {
   count: number;
-  filledCount: number;
   label: string;
+  progress: number;
 };
 
-export function DotGrid({ count, filledCount, label }: DotGridProps) {
+function getDotFillRatio(index: number, progress: number) {
+  return Math.min(1, Math.max(0, progress - index));
+}
+
+export function DotGrid({ count, label, progress }: DotGridProps) {
   return (
     <div aria-label={label} className="dot-grid">
       {Array.from({ length: count }, (_, index) => (
-        <Dot key={`year-${index}`} filled={index < filledCount} size="year" />
+        <Dot
+          key={`year-${index}`}
+          fillRatio={getDotFillRatio(index, progress)}
+          size="year"
+        />
       ))}
     </div>
   );

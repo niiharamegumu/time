@@ -1,16 +1,31 @@
+import type { CSSProperties } from "react";
+
 type DotSize = "day" | "month" | "work" | "year";
 
 type DotProps = {
-  filled: boolean;
+  fillRatio: number;
   size: DotSize;
 };
 
-export function Dot({ filled, size }: DotProps) {
+function clampFillRatio(fillRatio: number) {
+  return Math.min(1, Math.max(0, fillRatio));
+}
+
+export function Dot({ fillRatio, size }: DotProps) {
+  const clampedFillRatio = clampFillRatio(fillRatio);
+  const state =
+    clampedFillRatio >= 1 ? "full" : clampedFillRatio > 0 ? "partial" : "empty";
+
   return (
     <span
       aria-hidden="true"
       className={`progress-dot progress-dot--${size}`}
-      data-filled={filled ? "true" : "false"}
+      data-fill-state={state}
+      style={
+        {
+          "--dot-fill-angle": `${clampedFillRatio * 360}deg`,
+        } as CSSProperties
+      }
     />
   );
 }

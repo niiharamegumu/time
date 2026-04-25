@@ -1,126 +1,143 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { defaultSettings } from "../lib/settings/settings.types";
+import type { AppSettings } from "../lib/settings/settings.types";
 import { ClockPanel } from "./ClockPanel";
 
+const noop = () => undefined;
+
+function renderClockPanel(settings: AppSettings = defaultSettings) {
+  return render(
+    <ClockPanel
+      now={new Date(2026, 3, 22, 16, 8, 32)}
+      onAlwaysOnTopChange={noop}
+      onDisplayModeChange={noop}
+      onHideWindow={noop}
+      onOpenSettings={noop}
+      onQuit={noop}
+      settings={settings}
+    />,
+  );
+}
+
+function getProgressRings() {
+  return screen.getAllByLabelText(/progress ring/i);
+}
+
 describe("ClockPanel", () => {
-  const now = new Date(2026, 3, 22, 16, 8, 32);
+  it("renders the standard mode with date, split time, and progress rings", () => {
+    renderClockPanel();
 
-  it("renders the redesigned sections and formatted date/time", () => {
-    render(<ClockPanel now={now} settings={defaultSettings} />);
-
-    expect(screen.getByText("年月日")).toBeInTheDocument();
-    expect(screen.getByText("時分秒")).toBeInTheDocument();
-    expect(screen.getByText("日")).toBeInTheDocument();
-    expect(screen.getByText("月")).toBeInTheDocument();
-    expect(screen.getByText("年")).toBeInTheDocument();
-    expect(screen.getByText("2026.04.22")).toBeInTheDocument();
-    expect(screen.getByText("水")).toBeInTheDocument();
+    expect(screen.getByText("2026.04.22 Wed")).toBeInTheDocument();
     expect(screen.getByText("16:08")).toBeInTheDocument();
     expect(screen.getByText("32")).toBeInTheDocument();
+    expect(screen.getByText("日本時間（JST）")).toBeInTheDocument();
+    expect(screen.getByText("DAY")).toBeInTheDocument();
+    expect(screen.getByText("MONTH")).toBeInTheDocument();
+    expect(screen.getByText("YEAR")).toBeInTheDocument();
+    expect(screen.getByText("WORK")).toBeInTheDocument();
   });
 
-  it("renders the correct day, month, and year dot counts", () => {
-    render(<ClockPanel now={now} settings={defaultSettings} />);
+  it("renders requirement-based day, month, year, and work ring values", () => {
+    renderClockPanel();
 
-    expect(
-      within(screen.getByLabelText("1日 progress dots")).getAllByText("", {
-        selector: ".progress-dot",
-      }),
-    ).toHaveLength(24);
-    expect(
-      within(screen.getByLabelText("ひと月 progress dots")).getAllByText("", {
-        selector: ".progress-dot",
-      }),
-    ).toHaveLength(30);
-    expect(
-      within(screen.getByLabelText("1年 progress dots")).getAllByText("", {
-        selector: ".progress-dot",
-      }),
-    ).toHaveLength(365);
+    expect(getProgressRings()).toHaveLength(4);
+    expect(screen.getByText("16 / 24 h")).toBeInTheDocument();
+    expect(screen.getByText("22 / 30 d")).toBeInTheDocument();
+    expect(screen.getByText("16 / 53 w")).toBeInTheDocument();
+    expect(screen.getByText("6 / 8 h")).toBeInTheDocument();
   });
 
-  it("marks filled and unfilled dots through data attributes", () => {
-    render(<ClockPanel now={now} settings={defaultSettings} />);
+  it("renders ring progress through SVG stroke offsets", () => {
+    renderClockPanel();
 
-    const dayDots = within(screen.getByLabelText("1日 progress dots")).getAllByText("", {
-      selector: ".progress-dot",
-    });
-    const monthDots = within(screen.getByLabelText("ひと月 progress dots")).getAllByText("", {
-      selector: ".progress-dot",
-    });
+    const dayRing = screen.getByLabelText("DAY progress ring");
+    const dayBar = dayRing.querySelector(".progress-ring__bar");
 
-    expect(dayDots.filter((dot) => dot.getAttribute("data-filled") === "true")).toHaveLength(16);
-    expect(dayDots.filter((dot) => dot.getAttribute("data-filled") === "false")).toHaveLength(8);
-    expect(monthDots.filter((dot) => dot.getAttribute("data-filled") === "true")).toHaveLength(
-      22,
+    expect(dayBar).toHaveAttribute("stroke-dasharray");
+    expect(dayBar).toHaveAttribute("stroke-dashoffset");
+  });
+
+  it("uses live minute-based progress for day and work ring percentages", () => {
+    render(
+      <ClockPanel
+        now={new Date(2026, 3, 22, 9, 15, 0)}
+        onAlwaysOnTopChange={noop}
+        onDisplayModeChange={noop}
+        onHideWindow={noop}
+        onOpenSettings={noop}
+        onQuit={noop}
+        settings={{
+          ...defaultSettings,
+          breakEnabled: false,
+          workEndTime: "13:00",
+          workStartTime: "09:00",
+        }}
+      />,
     );
+
+    expect(screen.getByLabelText("DAY progress ring")).toHaveTextContent("38%");
+    expect(screen.getByLabelText("DAY progress ring")).toHaveTextContent("9 / 24 h");
+    expect(screen.getByLabelText("WORK progress ring")).toHaveTextContent("6%");
+    expect(screen.getByLabelText("WORK progress ring")).toHaveTextContent("0 / 4 h");
   });
 
-  it("renders 366 dots for leap years", () => {
+  it("uses 53 year weeks for leap years", () => {
     render(
       <ClockPanel
         now={new Date(2028, 1, 29, 9, 0, 0)}
+        onAlwaysOnTopChange={noop}
+        onDisplayModeChange={noop}
+        onHideWindow={noop}
+        onOpenSettings={noop}
+        onQuit={noop}
         settings={defaultSettings}
       />,
     );
 
-    expect(screen.getByText("月")).toBeInTheDocument();
-    expect(screen.getByText("年")).toBeInTheDocument();
-    expect(
-      within(screen.getByLabelText("1年 progress dots")).getAllByText("", {
-        selector: ".progress-dot",
-      }),
-    ).toHaveLength(366);
+    expect(screen.getByText("9 / 53 w")).toBeInTheDocument();
   });
 
-  it("shows work progress above the day section when work hours are configured", () => {
-    render(
-      <ClockPanel
-        now={new Date(2026, 3, 22, 10, 15, 0)}
-        settings={{
-          ...defaultSettings,
-          workProgressEnabled: true,
-          workStartTime: "09:00",
-          workEndTime: "13:00",
-        }}
-      />,
-    );
+  it("renders minimal mode with compact progress rings", () => {
+    renderClockPanel({ ...defaultSettings, displayMode: "minimal" });
 
-    expect(screen.getByText("仕事")).toBeInTheDocument();
-
-    const workDots = within(screen.getByLabelText("仕事 progress dots")).getAllByText("", {
-      selector: ".progress-dot",
-    });
-    expect(workDots).toHaveLength(8);
-    expect(workDots.filter((dot) => dot.getAttribute("data-filled") === "true")).toHaveLength(2);
-
-    const labels = screen
-      .getAllByText(/^(仕事|日|月|年)$/)
-      .map((element) => element.textContent);
-    expect(labels.indexOf("仕事")).toBeLessThan(labels.indexOf("日"));
+    expect(screen.getByText("16:08")).toBeInTheDocument();
+    expect(screen.getByText("32")).toBeInTheDocument();
+    expect(getProgressRings()).toHaveLength(4);
+    expect(screen.queryByText("DAY")).not.toBeInTheDocument();
   });
 
-  it("hides work progress when work hours are not configured", () => {
-    render(<ClockPanel now={now} settings={defaultSettings} />);
+  it("renders focus mode with work progress and supporting metrics", () => {
+    renderClockPanel({ ...defaultSettings, displayMode: "focus" });
 
-    expect(screen.queryByText("仕事")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("仕事 progress dots")).not.toBeInTheDocument();
+    expect(screen.getByText("16:08")).toBeInTheDocument();
+    expect(screen.getByText("WORK")).toBeInTheDocument();
+    expect(screen.getByText("DAY")).toBeInTheDocument();
+    expect(screen.getByText("MONTH")).toBeInTheDocument();
+    expect(screen.getByText("YEAR")).toBeInTheDocument();
+  });
+
+  it("renders ambient mode with percentage metrics", () => {
+    renderClockPanel({ ...defaultSettings, displayMode: "ambient" });
+
+    expect(screen.getByText("Wed")).toBeInTheDocument();
+    expect(screen.getByText("2026.04.22")).toBeInTheDocument();
+    expect(screen.getAllByText(/%/)).toHaveLength(2);
   });
 
   it("hides work progress when the toggle is off", () => {
-    render(
-      <ClockPanel
-        now={now}
-        settings={{
-          ...defaultSettings,
-          workProgressEnabled: false,
-          workStartTime: "09:00",
-          workEndTime: "13:00",
-        }}
-      />,
-    );
+    renderClockPanel({
+      ...defaultSettings,
+      workProgressEnabled: false,
+    });
 
-    expect(screen.queryByText("仕事")).not.toBeInTheDocument();
+    expect(screen.queryByText("Work")).not.toBeInTheDocument();
+  });
+
+  it("does not render the work schedule summary on the clock face", () => {
+    renderClockPanel();
+
+    expect(screen.queryByText(/勤務日/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/09:00 - 18:00/)).not.toBeInTheDocument();
   });
 });
