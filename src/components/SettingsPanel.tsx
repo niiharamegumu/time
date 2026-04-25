@@ -1,17 +1,35 @@
 import { useState } from "react";
 import type { UpdateInfo, UpdateStatus } from "../hooks/useUpdater";
+import type { DisplayMode } from "../lib/settings/settings.types";
+import type { WorkDay } from "../lib/settings/workSchedule";
 
 type SettingsPanelProps = {
   alwaysOnTop: boolean;
+  displayMode: DisplayMode;
+  launchAtLogin: boolean;
+  showDockIcon: boolean;
+  showSeconds: boolean;
+  breakEnabled: boolean;
+  breakEndTime: string | null;
+  breakStartTime: string | null;
   workProgressEnabled: boolean;
+  workDays: WorkDay[];
   workEndTime: string | null;
   workStartTime: string | null;
   onBackToApp: () => void;
   onAlwaysOnTopChange: (alwaysOnTop: boolean) => void;
+  onDisplayModeChange: (displayMode: DisplayMode) => void;
+  onLaunchAtLoginChange: (launchAtLogin: boolean) => void;
+  onShowDockIconChange: (showDockIcon: boolean) => void;
+  onShowSecondsChange: (showSeconds: boolean) => void;
   onWorkProgressEnabledChange: (workProgressEnabled: boolean) => void;
+  onWorkDaysChange: (workDays: WorkDay[]) => void;
   onWorkScheduleChange: (
     workStartTime: string | null,
     workEndTime: string | null,
+    breakStartTime: string | null,
+    breakEndTime: string | null,
+    breakEnabled: boolean,
   ) => void;
   onCheckForUpdates: () => void;
   onInstallUpdate: () => void;
@@ -94,12 +112,25 @@ function formatByteProgress(updateInfo: UpdateInfo | null) {
 
 export function SettingsPanel({
   alwaysOnTop,
+  displayMode,
+  launchAtLogin,
+  showDockIcon,
+  showSeconds,
+  breakEnabled,
+  breakEndTime,
+  breakStartTime,
   workProgressEnabled,
+  workDays,
   workEndTime,
   workStartTime,
   onBackToApp,
   onAlwaysOnTopChange,
+  onDisplayModeChange,
+  onLaunchAtLoginChange,
+  onShowDockIconChange,
+  onShowSecondsChange,
   onWorkProgressEnabledChange,
+  onWorkDaysChange,
   onWorkScheduleChange,
   onCheckForUpdates,
   onInstallUpdate,
@@ -117,10 +148,21 @@ export function SettingsPanel({
     updateStatus === "installing";
   const [workStartDraft, setWorkStartDraft] = useState(workStartTime ?? "");
   const [workEndDraft, setWorkEndDraft] = useState(workEndTime ?? "");
+  const [breakStartDraft, setBreakStartDraft] = useState(breakStartTime ?? "");
+  const [breakEndDraft, setBreakEndDraft] = useState(breakEndTime ?? "");
   const canInstall =
     updateInfo !== null &&
     (updateStatus === "available" || updateStatus === "error");
   const byteProgress = formatByteProgress(updateInfo);
+  const weekdayOptions: Array<{ label: string; value: WorkDay }> = [
+    { label: "Mon", value: "mon" },
+    { label: "Tue", value: "tue" },
+    { label: "Wed", value: "wed" },
+    { label: "Thu", value: "thu" },
+    { label: "Fri", value: "fri" },
+    { label: "Sat", value: "sat" },
+    { label: "Sun", value: "sun" },
+  ];
 
   return (
     <section aria-label="Settings panel" className="settings-panel">
@@ -171,6 +213,86 @@ export function SettingsPanel({
           <div className="settings-panel__card">
             {activeSection === "general" ? (
               <div className="settings-panel__list" role="list">
+                <div
+                  className="settings-panel__row settings-panel__row--list settings-panel__row--stack"
+                  role="listitem"
+                >
+                  <span className="settings-panel__row-copy">
+                    <span className="settings-panel__row-title">表示モード</span>
+                    <span className="settings-panel__row-description">
+                      用途に合わせて、時計と進捗の見せ方を切り替えます。
+                    </span>
+                  </span>
+                  <div className="settings-panel__segmented" role="group" aria-label="表示モード">
+                    {(["standard", "minimal", "focus", "ambient"] as const).map(
+                      (mode) => (
+                        <button
+                          key={mode}
+                          aria-pressed={displayMode === mode}
+                          className="settings-panel__segment"
+                          type="button"
+                          onClick={() => {
+                            onDisplayModeChange(mode);
+                          }}
+                        >
+                          {mode[0].toUpperCase()}
+                          {mode.slice(1)}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
+                <label className="settings-panel__row settings-panel__row--list" role="listitem">
+                  <span className="settings-panel__row-copy">
+                    <span className="settings-panel__row-title">秒を表示</span>
+                    <span className="settings-panel__row-description">
+                      Standard と Minimal の時計に秒を表示します。
+                    </span>
+                  </span>
+                  <input
+                    aria-label="秒を表示"
+                    className="settings-panel__switch-input"
+                    checked={showSeconds}
+                    type="checkbox"
+                    onChange={(event) => {
+                      onShowSecondsChange(event.target.checked);
+                    }}
+                  />
+                </label>
+                <label className="settings-panel__row settings-panel__row--list" role="listitem">
+                  <span className="settings-panel__row-copy">
+                    <span className="settings-panel__row-title">Dock アイコンを表示</span>
+                    <span className="settings-panel__row-description">
+                      Time を Dock とアプリ切り替えに表示します。
+                    </span>
+                  </span>
+                  <input
+                    aria-label="Dock アイコンを表示"
+                    className="settings-panel__switch-input"
+                    checked={showDockIcon}
+                    type="checkbox"
+                    onChange={(event) => {
+                      onShowDockIconChange(event.target.checked);
+                    }}
+                  />
+                </label>
+                <label className="settings-panel__row settings-panel__row--list" role="listitem">
+                  <span className="settings-panel__row-copy">
+                    <span className="settings-panel__row-title">ログイン時に起動</span>
+                    <span className="settings-panel__row-description">
+                      macOS にログインしたときに Time を自動で起動します。
+                    </span>
+                  </span>
+                  <input
+                    aria-label="ログイン時に起動"
+                    className="settings-panel__switch-input"
+                    checked={launchAtLogin}
+                    type="checkbox"
+                    onChange={(event) => {
+                      onLaunchAtLoginChange(event.target.checked);
+                    }}
+                  />
+                </label>
                 <label className="settings-panel__row settings-panel__row--list" role="listitem">
                   <span className="settings-panel__row-copy">
                     <span className="settings-panel__row-title">常に手前に表示</span>
@@ -225,6 +347,9 @@ export function SettingsPanel({
                           onWorkScheduleChange(
                             nextValue === "" ? null : nextValue,
                             workEndDraft === "" ? null : workEndDraft,
+                            breakStartDraft === "" ? null : breakStartDraft,
+                            breakEndDraft === "" ? null : breakEndDraft,
+                            breakEnabled,
                           );
                         }}
                       />
@@ -243,10 +368,94 @@ export function SettingsPanel({
                           onWorkScheduleChange(
                             workStartDraft === "" ? null : workStartDraft,
                             nextValue === "" ? null : nextValue,
+                            breakStartDraft === "" ? null : breakStartDraft,
+                            breakEndDraft === "" ? null : breakEndDraft,
+                            breakEnabled,
                           );
                         }}
                       />
                     </label>
+                    <label className="settings-panel__toggle">
+                      <span className="settings-panel__toggle-label">休憩</span>
+                      <input
+                        aria-label="休憩時間を有効にする"
+                        className="settings-panel__switch-input"
+                        checked={breakEnabled}
+                        disabled={!workProgressEnabled}
+                        type="checkbox"
+                        onChange={(event) => {
+                          onWorkScheduleChange(
+                            workStartDraft === "" ? null : workStartDraft,
+                            workEndDraft === "" ? null : workEndDraft,
+                            breakStartDraft === "" ? null : breakStartDraft,
+                            breakEndDraft === "" ? null : breakEndDraft,
+                            event.target.checked,
+                          );
+                        }}
+                      />
+                    </label>
+                    <label className="settings-panel__time-field">
+                      <span>休憩開始</span>
+                      <input
+                        aria-label="休憩開始時刻"
+                        disabled={!workProgressEnabled || !breakEnabled}
+                        step={1800}
+                        type="time"
+                        value={breakStartDraft}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setBreakStartDraft(nextValue);
+                          onWorkScheduleChange(
+                            workStartDraft === "" ? null : workStartDraft,
+                            workEndDraft === "" ? null : workEndDraft,
+                            nextValue === "" ? null : nextValue,
+                            breakEndDraft === "" ? null : breakEndDraft,
+                            breakEnabled,
+                          );
+                        }}
+                      />
+                    </label>
+                    <label className="settings-panel__time-field">
+                      <span>休憩終了</span>
+                      <input
+                        aria-label="休憩終了時刻"
+                        disabled={!workProgressEnabled || !breakEnabled}
+                        step={1800}
+                        type="time"
+                        value={breakEndDraft}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setBreakEndDraft(nextValue);
+                          onWorkScheduleChange(
+                            workStartDraft === "" ? null : workStartDraft,
+                            workEndDraft === "" ? null : workEndDraft,
+                            breakStartDraft === "" ? null : breakStartDraft,
+                            nextValue === "" ? null : nextValue,
+                            breakEnabled,
+                          );
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <div className="settings-panel__weekday-fields" role="group" aria-label="勤務曜日">
+                    {weekdayOptions.map((weekday) => (
+                      <button
+                        key={weekday.value}
+                        aria-pressed={workDays.includes(weekday.value)}
+                        className="settings-panel__weekday"
+                        disabled={!workProgressEnabled}
+                        type="button"
+                        onClick={() => {
+                          const nextWorkDays = workDays.includes(weekday.value)
+                            ? workDays.filter((workDay) => workDay !== weekday.value)
+                            : [...workDays, weekday.value];
+
+                          onWorkDaysChange(nextWorkDays);
+                        }}
+                      >
+                        {weekday.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>

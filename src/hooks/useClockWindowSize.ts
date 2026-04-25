@@ -1,26 +1,30 @@
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect } from "react";
+import type { DisplayMode } from "../lib/settings/settings.types";
+import { canUseTauriInternals } from "../lib/tauri/canUseTauriInternals";
 
-const BASE_MIN_WIDTH = 980;
-const BASE_MIN_HEIGHT = 720;
-const WORK_MIN_WIDTH = 1120;
-const WORK_MIN_HEIGHT = 860;
+const MIN_WIDTH = 320;
+const MIN_HEIGHT = 180;
+const PREFERRED_SIZES: Record<DisplayMode, { height: number; width: number }> = {
+  ambient: { width: 420, height: 400 },
+  focus: { width: 420, height: 400 },
+  minimal: { width: 420, height: 320 },
+  standard: { width: 1120, height: 680 },
+};
 
 export function useClockWindowSize(
-  showWorkProgress: boolean,
+  displayMode: DisplayMode,
   enabled: boolean,
 ) {
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !canUseTauriInternals()) {
       return;
     }
 
     const currentWindow = getCurrentWindow();
-    const minSize = new LogicalSize(
-      showWorkProgress ? WORK_MIN_WIDTH : BASE_MIN_WIDTH,
-      showWorkProgress ? WORK_MIN_HEIGHT : BASE_MIN_HEIGHT,
-    );
+    const minSize = new LogicalSize(MIN_WIDTH, MIN_HEIGHT);
+    const preferredSize = PREFERRED_SIZES[displayMode];
 
     void (async () => {
       await currentWindow.setMinSize(minSize);
@@ -39,6 +43,18 @@ export function useClockWindowSize(
           ),
         );
       }
-    })();
-  }, [enabled, showWorkProgress]);
+
+      if (
+        currentSize.width < preferredSize.width ||
+        currentSize.height < preferredSize.height
+      ) {
+        await currentWindow.setSize(
+          new LogicalSize(
+            Math.max(currentSize.width, preferredSize.width),
+            Math.max(currentSize.height, preferredSize.height),
+          ),
+        );
+      }
+    })().catch(() => undefined);
+  }, [displayMode, enabled]);
 }
