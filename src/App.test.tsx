@@ -13,6 +13,7 @@ import { APP_SETTINGS_STORAGE_KEY } from "./lib/settings/settings.storage";
 const hide = vi.fn();
 const unlistenCloseRequested = vi.fn();
 const emit = vi.fn();
+const checkForUpdates = vi.fn();
 const unlistenEvent = vi.fn();
 const onCloseRequested = vi.fn();
 
@@ -56,14 +57,20 @@ vi.mock("@tauri-apps/api/event", () => ({
   }),
 }));
 
+vi.mock("@tauri-apps/plugin-updater", () => ({
+  check: (...args: unknown[]) => checkForUpdates(...args),
+}));
+
 describe("App", () => {
   beforeEach(() => {
+    vi.stubEnv("PROD", true);
     closeRequestedHandler = undefined;
     alwaysOnTopListener = undefined;
     currentWindowLabel = "main";
     localStorage.clear();
     emit.mockReset();
     hide.mockReset();
+    checkForUpdates.mockReset();
     onCloseRequested.mockClear();
     unlistenCloseRequested.mockReset();
     unlistenEvent.mockReset();
@@ -84,7 +91,12 @@ describe("App", () => {
 
     render(<App />);
 
-    expect(screen.getByRole("region", { name: "Settings panel" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Settings panel" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "アップデート" }),
+    ).toBeInTheDocument();
     expect(onCloseRequested).not.toHaveBeenCalled();
   });
 
@@ -137,5 +149,19 @@ describe("App", () => {
     });
 
     expect(screen.getByRole("checkbox", { name: "常に手前に表示" })).toBeChecked();
+  });
+
+  it("shows the up-to-date state after a manual update check", async () => {
+    currentWindowLabel = "settings";
+    checkForUpdates.mockResolvedValue(null);
+
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "アップデート" }));
+    fireEvent.click(screen.getByRole("button", { name: "更新をチェック" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("最新です")).toBeInTheDocument();
+    });
   });
 });
