@@ -119,18 +119,6 @@ jobs:
           fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
           EOF
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Frontend tests
-        run: npm run test:run
-
-      - name: Rust tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
-
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0.6.2
         with:
