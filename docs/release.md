@@ -30,6 +30,7 @@
   - `TAURI_UPDATER_PUBKEY`
 
 `TAURI_UPDATER_PUBKEY` は公開鍵なので secret ではなく repository variable を想定しています。
+この release は Apple Developer ID notarization なしで配布します。初回起動時に macOS の「開発元を検証できません」警告が出る場合は、システム設定のプライバシーとセキュリティから許可してください。
 
 ## Key Generation
 
@@ -46,5 +47,6 @@ npm run tauri signer generate -- -w ~/.tauri/time.key
 - version が 3 ファイルで一致しているか
 - `TAURI_UPDATER_PUBKEY` が設定されているか
 - `TAURI_SIGNING_PRIVATE_KEY` と password が正しいか
+- Release asset の `.app` が `codesign --verify --deep --strict --verbose=4 Time.app` を通るか
 - `tauri-action` が `latest.json` と macOS updater asset を upload できているか
 - `v{version}` の release tag が既に作成済みでないか

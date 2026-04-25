@@ -23,6 +23,8 @@ Time は macOS 向けのシンプルな時計アプリです。Tauri 2、React�
 
 macOS の Gatekeeper により初回起動時に確認が出る場合があります。その場合は、Finder の `Applications` で `Time.app` を右クリックして `開く` を選び、確認ダイアログでもう一度 `開く` を選択してください。
 
+Release からダウンロードしたアプリが「壊れているため開けません」と表示される場合は、修正済みの新しい release を使ってください。
+
 ## Updating
 
 - 設定画面の「更新をチェック」から GitHub Releases 上の `latest.json` を参照して更新を確認します。
