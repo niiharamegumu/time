@@ -14,7 +14,7 @@ describe("datetime formatters", () => {
     expect(formatDate(date)).toBe("2026.04.22");
   });
 
-  it("formats weekday in Japanese", () => {
-    expect(formatWeekday(date)).toBe("水");
+  it("formats weekday in English", () => {
+    expect(formatWeekday(date)).toBe("Wed");
   });
 });

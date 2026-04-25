@@ -7,23 +7,25 @@ import {
 } from "./getCalendarProgress";
 
 describe("getCalendarProgress", () => {
-  it("uses the current hour for filled day dots", () => {
-    expect(getCalendarProgress(new Date(2026, 3, 22, 0, 0, 0)).filledDayDots).toBe(0);
-    expect(getCalendarProgress(new Date(2026, 3, 22, 16, 8, 32)).filledDayDots).toBe(16);
+  it("uses elapsed day time for day dot progress", () => {
+    expect(getCalendarProgress(new Date(2026, 3, 22, 0, 0, 0)).dayDotProgress).toBe(0);
+    expect(getCalendarProgress(new Date(2026, 3, 22, 16, 30, 0)).dayDotProgress).toBe(16.5);
   });
 
   it("matches the number of days in a 30-day month", () => {
     const progress = getCalendarProgress(new Date(2026, 3, 22, 16, 8, 32));
 
     expect(progress.daysInMonth).toBe(30);
-    expect(progress.filledMonthDots).toBe(22);
+    expect(progress.monthUnitCount).toBe(22);
+    expect(progress.monthDotProgress).toBeGreaterThan(21);
+    expect(progress.monthDotProgress).toBeLessThan(22);
   });
 
   it("matches the number of days in a 31-day month", () => {
     const progress = getCalendarProgress(new Date(2026, 6, 31, 12, 0, 0));
 
     expect(progress.daysInMonth).toBe(31);
-    expect(progress.filledMonthDots).toBe(31);
+    expect(progress.monthUnitCount).toBe(31);
   });
 
   it("handles February in a leap year", () => {
@@ -31,8 +33,10 @@ describe("getCalendarProgress", () => {
 
     expect(progress.daysInMonth).toBe(29);
     expect(progress.daysInYear).toBe(366);
-    expect(progress.filledMonthDots).toBe(29);
-    expect(progress.filledYearDots).toBe(60);
+    expect(progress.yearDotCount).toBe(53);
+    expect(progress.monthUnitCount).toBe(29);
+    expect(progress.dayOfYear).toBe(60);
+    expect(progress.yearUnitCount).toBe(9);
   });
 });
 
