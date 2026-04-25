@@ -15,6 +15,10 @@ import { APP_SETTINGS_STORAGE_KEY } from "./lib/settings/settings.storage";
 import { defaultSettings } from "./lib/settings/settings.types";
 
 const hide = vi.fn();
+const invoke = vi.fn(async (command?: string, args?: unknown) => {
+  void command;
+  void args;
+});
 const innerSize = vi.fn(async () => ({
   toLogical: () => ({
     width: 1280,
@@ -24,11 +28,15 @@ const innerSize = vi.fn(async () => ({
 const unlistenCloseRequested = vi.fn();
 const emit = vi.fn();
 const checkForUpdates = vi.fn();
+const enableAutostart = vi.fn(async () => undefined);
+const disableAutostart = vi.fn(async () => undefined);
+const isAutostartEnabled = vi.fn(async () => false);
 const unlistenEvent = vi.fn();
 const onCloseRequested = vi.fn();
 const scaleFactor = vi.fn(async () => 1);
 const setMinSize = vi.fn(async () => undefined);
 const setSize = vi.fn(async () => undefined);
+const startDragging = vi.fn(async () => undefined);
 
 let closeRequestedHandler:
   | ((event: { preventDefault: () => void }) => void)
@@ -62,7 +70,12 @@ vi.mock("@tauri-apps/api/window", () => ({
     scaleFactor,
     setMinSize,
     setSize,
+    startDragging,
   }),
+}));
+
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: (command: string, args?: unknown) => invoke(command, args),
 }));
 
 vi.mock("@tauri-apps/api/event", () => ({
@@ -88,9 +101,19 @@ vi.mock("@tauri-apps/plugin-updater", () => ({
   check: (...args: unknown[]) => checkForUpdates(...args),
 }));
 
+vi.mock("@tauri-apps/plugin-autostart", () => ({
+  disable: () => disableAutostart(),
+  enable: () => enableAutostart(),
+  isEnabled: () => isAutostartEnabled(),
+}));
+
 describe("App", () => {
   beforeEach(() => {
     vi.stubEnv("PROD", true);
+    Object.defineProperty(window, "__TAURI_INTERNALS__", {
+      configurable: true,
+      value: {},
+    });
     closeRequestedHandler = undefined;
     alwaysOnTopListener = undefined;
     settingsSyncListener = undefined;
@@ -98,21 +121,29 @@ describe("App", () => {
     currentTheme = "light";
     localStorage.clear();
     emit.mockReset();
+    invoke.mockClear();
     hide.mockReset();
     innerSize.mockClear();
     checkForUpdates.mockReset();
+    enableAutostart.mockClear();
+    disableAutostart.mockClear();
+    isAutostartEnabled.mockClear();
+    isAutostartEnabled.mockResolvedValue(false);
     onCloseRequested.mockClear();
     scaleFactor.mockClear();
     setMinSize.mockReset();
     setSize.mockReset();
+    startDragging.mockClear();
     unlistenCloseRequested.mockReset();
     unlistenEvent.mockReset();
   });
 
-  it("does not emit settings sync from the main window", async () => {
+  it("emits settings sync from the main window so native window state is applied", async () => {
     render(<App />);
 
-    expect(emit).not.toHaveBeenCalledWith("settings:sync", expect.anything());
+    await waitFor(() => {
+      expect(emit).toHaveBeenCalledWith("settings:sync", defaultSettings);
+    });
   });
 
   it("renders the dedicated settings window when opened from native UI", () => {
@@ -130,12 +161,72 @@ describe("App", () => {
     expect(emit).toHaveBeenCalledWith("settings:sync", defaultSettings);
   });
 
+  it("does not reapply dock visibility just by opening settings", () => {
+    currentWindowLabel = "settings";
+
+    render(<App />);
+
+    expect(invoke).not.toHaveBeenCalledWith("set_show_dock_icon", expect.anything());
+  });
+
+  it("does not rewrite login item state just by opening settings", async () => {
+    currentWindowLabel = "settings";
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(isAutostartEnabled).toHaveBeenCalledOnce();
+    });
+    expect(enableAutostart).not.toHaveBeenCalled();
+    expect(disableAutostart).not.toHaveBeenCalled();
+  });
+
+  it("updates login item state after the user changes the setting", async () => {
+    currentWindowLabel = "settings";
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(isAutostartEnabled).toHaveBeenCalledOnce();
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: "ログイン時に起動" }));
+
+    await waitFor(() => {
+      expect(enableAutostart).toHaveBeenCalledOnce();
+    });
+    expect(disableAutostart).not.toHaveBeenCalled();
+  });
+
   it("passes the current theme to the main clock window", () => {
     currentTheme = "dark";
 
     render(<App />);
 
     expect(screen.getByRole("main")).toHaveAttribute("data-theme", "dark");
+  });
+
+  it("marks the main clock as native only inside Tauri", () => {
+    render(<App />);
+
+    expect(screen.getByRole("main")).toHaveClass("app-shell--native");
+  });
+
+  it("starts native window dragging from the titlebar region", () => {
+    const { container } = render(<App />);
+    const dragRegion = container.querySelector(".native-titlebar-drag-region");
+
+    expect(dragRegion).not.toBeNull();
+    fireEvent.mouseDown(dragRegion as Element, { button: 0 });
+
+    expect(startDragging).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the browser clock layout classless for native-only styling", () => {
+    delete (window as Window & { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
+
+    render(<App />);
+
+    expect(screen.getByRole("main")).not.toHaveClass("app-shell--native");
   });
 
   it("updates always-on-top when the settings checkbox changes", async () => {
@@ -154,12 +245,28 @@ describe("App", () => {
     );
   });
 
+  it("syncs always-on-top changes from the clock menu to native state", async () => {
+    render(<App />);
+
+    emit.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Open Time menu" }));
+    fireEvent.click(screen.getByRole("menuitemcheckbox", { name: /Always on Top/ }));
+
+    await waitFor(() => {
+      expect(emit).toHaveBeenCalledWith(
+        "settings:sync",
+        expect.objectContaining({
+          alwaysOnTop: true,
+        }),
+      );
+    });
+  });
+
   it("saves work schedule when both start and end times are valid", () => {
     currentWindowLabel = "settings";
 
     render(<App />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "仕事時間を表示" }));
     fireEvent.change(screen.getByLabelText("仕事開始時刻"), {
       target: { value: "09:00" },
     });
@@ -174,6 +281,22 @@ describe("App", () => {
         workProgressEnabled: true,
         workStartTime: "09:00",
         workEndTime: "13:00",
+      }),
+    );
+  });
+
+  it("saves display mode changes from settings", () => {
+    currentWindowLabel = "settings";
+
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Focus" }));
+
+    expect(
+      JSON.parse(localStorage.getItem(APP_SETTINGS_STORAGE_KEY) ?? ""),
+    ).toEqual(
+      expect.objectContaining({
+        displayMode: "focus",
       }),
     );
   });
@@ -245,32 +368,17 @@ describe("App", () => {
       });
     });
 
-    expect(screen.getByText("仕事")).toBeInTheDocument();
+    expect(screen.getByText("WORK")).toBeInTheDocument();
   });
 
-  it("raises the main window minimum height when work progress is configured", async () => {
+  it("keeps a compact main window minimum size", async () => {
     render(<App />);
-
-    await waitFor(() => {
-      expect(settingsSyncListener).toBeTypeOf("function");
-    });
-
-    await act(async () => {
-      settingsSyncListener?.({
-        payload: {
-          ...defaultSettings,
-          workProgressEnabled: true,
-          workStartTime: "09:00",
-          workEndTime: "13:00",
-        },
-      });
-    });
 
     await waitFor(() => {
       expect(setMinSize).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          width: 1120,
-          height: 860,
+          width: 320,
+          height: 180,
         }),
       );
     });
@@ -282,13 +390,6 @@ describe("App", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "仕事時間を表示" }));
-    fireEvent.change(screen.getByLabelText("仕事開始時刻"), {
-      target: { value: "09:00" },
-    });
-    fireEvent.change(screen.getByLabelText("仕事終了時刻"), {
-      target: { value: "13:00" },
-    });
-    fireEvent.click(screen.getByRole("checkbox", { name: "仕事時間を表示" }));
 
     expect(
       JSON.parse(localStorage.getItem(APP_SETTINGS_STORAGE_KEY) ?? ""),
@@ -296,7 +397,7 @@ describe("App", () => {
       expect.objectContaining({
         workProgressEnabled: false,
         workStartTime: "09:00",
-        workEndTime: "13:00",
+        workEndTime: "18:00",
       }),
     );
   });
@@ -309,12 +410,12 @@ describe("App", () => {
     const checkbox = screen.getByRole("checkbox", { name: "仕事時間を表示" });
 
     fireEvent.click(checkbox);
-    expect(checkbox).toBeChecked();
-
-    fireEvent.click(checkbox);
     expect(checkbox).not.toBeChecked();
 
     fireEvent.click(checkbox);
     expect(checkbox).toBeChecked();
+
+    fireEvent.click(checkbox);
+    expect(checkbox).not.toBeChecked();
   });
 });
