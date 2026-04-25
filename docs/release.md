@@ -12,6 +12,7 @@
 - version の正は [src-tauri/tauri.conf.json](/Users/megu/Github/time/src-tauri/tauri.conf.json) の `version` です。
 - [package.json](/Users/megu/Github/time/package.json) と [src-tauri/Cargo.toml](/Users/megu/Github/time/src-tauri/Cargo.toml) の version は同じ値を維持します。
 - release workflow は 3 つの version が一致しない場合に fail します。
+- release 前の version 更新は `npm run version:bump -- <major|minor|patch|x.y.z>` で一元化します。
 
 ## Release Condition
 
