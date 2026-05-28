@@ -37,6 +37,18 @@ describe("getWorkProgress", () => {
     ).toBe(1.5);
   });
 
+  it("supports schedules that start on non-half-hour minutes", () => {
+    const progress = getWorkProgress(new Date(2026, 3, 23, 9, 45, 0), {
+      ...schedule,
+      workStartTime: "08:45",
+      workEndTime: "18:00",
+    });
+
+    expect(progress.totalWorkHours).toBe(9.25);
+    expect(progress.workDotProgress).toBe(1);
+    expect(progress.completedWorkHours).toBe(1);
+  });
+
   it("caps progress at the total after work ends", () => {
     expect(
       getWorkProgress(new Date(2026, 3, 23, 13, 0, 0), schedule).workDotProgress,

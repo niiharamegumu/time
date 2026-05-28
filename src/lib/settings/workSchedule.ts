@@ -12,7 +12,7 @@ export type WorkSchedule = {
   workDays?: WorkDay[];
 };
 
-const WORK_TIME_PATTERN = /^([01]\d|2[0-3]):(00|30)$/;
+const WORK_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 export const DEFAULT_WORK_DAYS: WorkDay[] = ["mon", "tue", "wed", "thu", "fri"];
 
 export function isValidWorkTime(value: string) {

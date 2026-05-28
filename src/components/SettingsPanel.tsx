@@ -317,7 +317,7 @@ export function SettingsPanel({
                   <div className="settings-panel__row-copy">
                     <h2 className="settings-panel__row-title">仕事時間</h2>
                     <p className="settings-panel__row-description">
-                      開始と終了を30分刻みで設定すると、主画面に仕事の進捗を表示します。
+                      開始と終了を設定すると、主画面に仕事の進捗を表示します。
                     </p>
                   </div>
                   <div className="settings-panel__time-fields">
@@ -338,7 +338,6 @@ export function SettingsPanel({
                       <input
                         aria-label="仕事開始時刻"
                         disabled={!workProgressEnabled}
-                        step={1800}
                         type="time"
                         value={workStartDraft}
                         onChange={(event) => {
@@ -359,7 +358,6 @@ export function SettingsPanel({
                       <input
                         aria-label="仕事終了時刻"
                         disabled={!workProgressEnabled}
-                        step={1800}
                         type="time"
                         value={workEndDraft}
                         onChange={(event) => {
@@ -399,7 +397,6 @@ export function SettingsPanel({
                       <input
                         aria-label="休憩開始時刻"
                         disabled={!workProgressEnabled || !breakEnabled}
-                        step={1800}
                         type="time"
                         value={breakStartDraft}
                         onChange={(event) => {
@@ -420,7 +417,6 @@ export function SettingsPanel({
                       <input
                         aria-label="休憩終了時刻"
                         disabled={!workProgressEnabled || !breakEnabled}
-                        step={1800}
                         type="time"
                         value={breakEndDraft}
                         onChange={(event) => {
