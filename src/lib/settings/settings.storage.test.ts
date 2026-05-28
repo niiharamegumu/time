@@ -22,13 +22,13 @@ describe("normalizeSettings", () => {
     expect(
       normalizeSettings({
         workProgressEnabled: true,
-        workStartTime: "09:00",
+        workStartTime: "08:45",
         workEndTime: "13:00",
       }),
     ).toEqual({
       ...defaultSettings,
       workProgressEnabled: true,
-      workStartTime: "09:00",
+      workStartTime: "08:45",
       workEndTime: "13:00",
     });
   });
@@ -95,7 +95,7 @@ describe("normalizeSettings", () => {
   it("clears invalid work schedules", () => {
     expect(
       normalizeSettings({
-        workStartTime: "09:15",
+        workStartTime: "09:60",
         workEndTime: "13:00",
       }),
     ).toEqual(defaultSettings);
